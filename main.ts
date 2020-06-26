@@ -31,11 +31,13 @@ function showIcon (mode:string) {
 // ・交互に点滅を繰り返す
 function led_on (mtime: number) {
     if (g_time < input.runningTime()) {
+        // 点消灯切り替え
         g_led_left = (g_led_left == maqueen.LEDswitch.turnOff) ? maqueen.LEDswitch.turnOn : g_led_right = maqueen.LEDswitch.turnOff
         g_led_right = (g_led_right == maqueen.LEDswitch.turnOff) ? maqueen.LEDswitch.turnOn : g_led_right = maqueen.LEDswitch.turnOff
         // 次の点滅時間の算出
         g_time = input.runningTime() + mtime
     }
+    // ＬＥＤ点消灯
     maqueen.writeLED(maqueen.LED.LEDLeft, g_led_left)
     maqueen.writeLED(maqueen.LED.LEDRight, g_led_right)
 }
@@ -94,8 +96,10 @@ function lineTrace (speed: number) {
 // 走行停止動作関数
 // ・全モータ停止
 function Stop () {
+    // モータ停止
     maqueen.motorStop(maqueen.Motors.All)
 
+    // 初期状態へ
     if (g_stop_time < input.runningTime()) {
         basic.showIcon(IconNames.Asleep)
         maqueen.writeLED(maqueen.LED.LEDLeft, maqueen.LEDswitch.turnOff)
