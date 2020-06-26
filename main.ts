@@ -4,16 +4,19 @@
 // ・動作指示の送信
 // を行う。
 input.onButtonPressed(Button.A, function () {
-    // 動作を決定
-    g_mode = "Run"
+    let mode = "Run"
+    // 停止時間制御
+    g_stop_time = input.runningTime() + 10000
     // アイコンの表示
-    showIcon()
+    showIcon(mode)
+    // 動作を決定
+    g_mode = mode
     // 動作指示を送信
-    radio.sendString(g_mode)
+    radio.sendString(mode)
 })
 // 動作モードに従ったアイコン表示関数
-function showIcon () {
-    switch (g_mode) {
+function showIcon (mode:string) {
+    switch (mode) {
     // 走行モード（笑い顔）
     case "Run":
         basic.showIcon(IconNames.Happy)
@@ -41,10 +44,12 @@ function led_on (mtime: number) {
 // ・動作に対応したアイコン表示
 // を行う。
 radio.onReceivedString(function (receivedString) {
+    // 停止時間制御
+    g_stop_time = input.runningTime() + 10000
+    // アイコンの表示
+    showIcon(receivedString)
     // 受信した動作指示を保存
     g_mode = receivedString
-    // アイコンの表示
-    showIcon()
 })
 // 送信機のBボタンが押されたら
 // ・動作指示を停止とする
@@ -52,12 +57,15 @@ radio.onReceivedString(function (receivedString) {
 // ・動作指示の送信
 // を行う。
 input.onButtonPressed(Button.B, function () {
-    // 動作を決定
-    g_mode = "Stop"
+    let mode ="Stop"
+    // 停止時間制御
+    g_stop_time = input.runningTime() + 10000
     // アイコンの表示
-    showIcon()
+    showIcon(mode)
+    // 動作を決定
+    g_mode = mode
     // 動作指示を送信
-    radio.sendString(g_mode)
+    radio.sendString(mode)
 })
 // ライントレース走行関数
 // ・全タイヤライン上
@@ -87,6 +95,12 @@ function lineTrace (speed: number) {
 // ・全モータ停止
 function Stop () {
     maqueen.motorStop(maqueen.Motors.All)
+
+    if (g_stop_time < input.runningTime()) {
+        basic.showIcon(IconNames.Asleep)
+        maqueen.writeLED(maqueen.LED.LEDLeft, maqueen.LEDswitch.turnOff)
+        maqueen.writeLED(maqueen.LED.LEDRight, maqueen.LEDswitch.turnOff)
+    }
 }
 let g_speed_right = 0
 let g_speed_reft = 0
@@ -94,10 +108,11 @@ let g_time = 0
 let g_mode = ""
 let c_mtime = 1000
 g_time = input.runningTime() + c_mtime
-g_mode = "Stop"
+g_mode = ""
 let g_speed = 30
 let g_led_left:maqueen.LEDswitch = maqueen.LEDswitch.turnOn
 let g_led_right:maqueen.LEDswitch = maqueen.LEDswitch.turnOff
+let g_stop_time = 0
 radio.setGroup(1)
 basic.showIcon(IconNames.Asleep)
 // 主処理
